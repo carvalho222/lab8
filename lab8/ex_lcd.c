@@ -4,21 +4,22 @@
 #include<timers.h>
 #include <stdlib.h>
 #include <usart.h>
+//Teste
 
-// ConfiguraÁıes
+// Configura√ß√µes
 #pragma config CPUDIV = OSC1_PLL2
 #pragma config	FOSC = HS			// Fosc = 20MHz -> Tcy = 200ns
 #pragma config	WDT = OFF	// Watchdog desativado
 #pragma config WDTPS = 512	// Postscaler WDT = 512	
-#pragma config	PBADEN = OFF		// Pinos do PORTB comeÁam como digitais
-#pragma config	LVP = OFF			// Desabilita gravaÁ„o em baixa tens„o
+#pragma config	PBADEN = OFF		// Pinos do PORTB come√ßam como digitais
+#pragma config	LVP = OFF			// Desabilita grava√ß√£o em baixa tens√£o
 
-// Botıes
+// Bot√µes
 #define BT0 PORTBbits.RB0
 #define BT1 PORTBbits.RB1
 #define BT2 PORTBbits.RB2
 
-// Var·iveis Globais
+// Var√°iveis Globais
 char inc = 1;  
 char segundos = 0;
 char minutos = 0;
@@ -34,7 +35,7 @@ char setpoint;
 int conversao;
 char temp;
 
-// ProtÛtipos das funÁıes
+// Prot√≥tipos das fun√ß√µes
 void ajusta_dc(unsigned int ciclo_ativo);
 unsigned int ciclo_ativo = 0;
 
@@ -47,63 +48,63 @@ void main(void){
 	TRISD = 0x00; 		// Todas as portas como digitais
 	INTCON2bits.NOT_RBPU = 0;	// Habilita pull-ups da PORTB
 
-// ConfiguraÁ„o das interrupÁıes
+// Configura√ß√£o das interrup√ß√µes
 	RCONbits.IPEN = 1;		// habilita prioridade
 	INTCONbits.GIEL = 1;	
 	INTCONbits.GIEH = 1;
 
-// ConfiguraÁ„o de INT0
+// Configura√ß√£o de INT0
 	INTCONbits.INT0IE = 1;	// habilita INT0
 	INTCONbits.INT0IF = 0;	// zera flag da INT0
-	// INT0 È sempre de alta prioridade	
+	// INT0 √© sempre de alta prioridade	
 
-// ConfiguraÁ„o de INT1
+// Configura√ß√£o de INT1
 	INTCON3bits.INT1IE = 1;	// habilita INT1
 	INTCON3bits.INT1IF = 0;	// zera flag da INT1
-	INTCON3bits.INT1IP = 1;	// interrupÁ„o INT1 È de alta prioridade
+	INTCON3bits.INT1IP = 1;	// interrup√ß√£o INT1 √© de alta prioridade
 
-// ConfiguraÁ„o de INT2
+// Configura√ß√£o de INT2
 	INTCON3bits.INT2IE = 1;	// habilita INT2
 	INTCON3bits.INT2IF = 0;	// zera flag da INT2
-	INTCON3bits.INT2IP = 1;	// interrupÁ„o INT2 È de alta prioridade
+	INTCON3bits.INT2IP = 1;	// interrup√ß√£o INT2 √© de alta prioridade
 
-// ConfiguraÁ„o do TMR0
+// Configura√ß√£o do TMR0
 	T0CON = 0b10000110;
-	INTCON2bits.TMR0IP = 1;	// interrupÁ„o TMR0 È de alta prioridade
+	INTCON2bits.TMR0IP = 1;	// interrup√ß√£o TMR0 √© de alta prioridade
 	INTCONbits.TMR0IF = 0;
 	INTCONbits.TMR0IE = 1;
 	WriteTimer0(26474);			// CARGA INICIAL = 26474 = 0X676A
 
-// ConfiguraÁ„o do Timer 1
-	IPR1bits.TMR1IP = 1; // TMR1 È de alta prioridade
+// Configura√ß√£o do Timer 1
+	IPR1bits.TMR1IP = 1; // TMR1 √© de alta prioridade
 	PIR1bits.TMR1IF = 0;			
 	//WriteTimer1(64117);			// CARGA INICIAL = 64117
 	T1CON = 0b11110100;	
 	T1CONbits.T1SYNC = 0;
 
-// ConfiguraÁ„o do Timer 2
+// Configura√ß√£o do Timer 2
 	T2CON = 0b00000101; //TMR2 ON, prescaler 4, postscaler n importa, CI = 0
 	PR2 = 249;
 	// T = 200n*250*4 = 200us => f = 5000Hz.
-	// (PR2 + 1) * 4 = 1000, maximo que ele chega È 1000, entao n sera utilizado 10 bits
-	// de resoluÁ„o, sera um pouco menos, logo a partir de 1000 ate 1023 sempre sera 100%
-	// de ciclo ativo. Ent„o sempre que tiver em 1000 ser· 100% de duty cycle.
+	// (PR2 + 1) * 4 = 1000, maximo que ele chega √© 1000, entao n sera utilizado 10 bits
+	// de resolu√ß√£o, sera um pouco menos, logo a partir de 1000 ate 1023 sempre sera 100%
+	// de ciclo ativo. Ent√£o sempre que tiver em 1000 ser√° 100% de duty cycle.
 
-// ConfiguraÁ„o CCP2 - PWM
-	CCP2CON = 0b00001100; //bits 4 e 5 s„o os dois bits menos significativos do duty cycle
-	// os 8 mais significativos est„o em CCPR1L.
+// Configura√ß√£o CCP2 - PWM
+	CCP2CON = 0b00001100; //bits 4 e 5 s√£o os dois bits menos significativos do duty cycle
+	// os 8 mais significativos est√£o em CCPR1L.
 	
-// ConfiguraÁıes Serial
+// Configura√ß√µes Serial
 	TXSTAbits.BRGH = 1;
 	TXSTAbits.SYNC = 0; 	// Assincrono
 	BAUDCONbits.BRG16 = 0; 	// 8bits
 	RCSTAbits.SPEN = 1; 	// Habilita o serial para o uso 
-	TRISCbits.TRISC6 = 0; 	// Pino RC6 como saÌda
+	TRISCbits.TRISC6 = 0; 	// Pino RC6 como sa√≠da
 	TXSTAbits.TXEN = 1; 	// Habilita a transmissao
 	SPBRG = 129;
 	SPBRGH = 0;
 
-// InterrupÁıes do Serial
+// Interrup√ß√µes do Serial
 /*PIR1bits.TXIF = 0;
 PIE1bits.TXIE = 1;
 IPR1bits.TXIP = 0;
@@ -112,7 +113,7 @@ PIE1bits.RCIE = 1;
 PIR1bits.RCIF = 0;
 IPR1bits.RCIP = 0;*/
 
-//ConfiguraÁıes CCP1
+//Configura√ß√µes CCP1
 CCP1CON = 0b00001011; 
 PIE1bits.CCP1IE = 1;
 IPR1bits.CCP1IP = 0;
@@ -120,7 +121,7 @@ PIR1bits.CCP1IF = 0;
 CCPR1H = 0x05;
 CCPR1L = 0x8B; 
 
-// ConfiguraÁ„o ADCON
+// Configura√ß√£o ADCON
 ADCON0 = 0b00000001;
 ADCON1 = 0b00001110;
 ADCON2 = 0b10111101;
@@ -128,10 +129,10 @@ PIE1bits.ADIE = 1;
 IPR1bits.ADIP = 0;
 PIR1bits.ADIF = 0;
 
-// IniciaÁ„o do LCD
-  	OpenXLCD(FOUR_BIT & LINES_5X7);	        // ComunicaÁ„o por byte e caracter 5x7 
+// Inicia√ß√£o do LCD
+  	OpenXLCD(FOUR_BIT & LINES_5X7);	        // Comunica√ß√£o por byte e caracter 5x7 
   	WriteCmdXLCD(0x01);					 // comando para limpar a tela
-  	Delay10KTCYx(8);			         // Delay necess·rio para a inicializaÁ„o do LCD
+  	Delay10KTCYx(8);			         // Delay necess√°rio para a inicializa√ß√£o do LCD
                                          // 10000*200n*8 = 16ms
 	WriteCmdXLCD(0x0C);				 // Comando para desligar cursor
 
@@ -183,7 +184,7 @@ PIR1bits.ADIF = 0;
 		TRISC = 0b00111101;
 		ajusta_dc(ciclo_ativo);
 		dc = ciclo_ativo / 10;		// DC em %
-		ltoa((long)dc, dc_str);		// Convers„o para ASCII
+		ltoa((long)dc, dc_str);		// Convers√£o para ASCII
 		WriteCmdXLCD(0xC0);
 		putrsXLCD("    DC: ");
 		putsXLCD(dc_str);
@@ -204,6 +205,6 @@ void ajusta_dc(unsigned int valor_dc){
 	CCP2CONbits.DC2B1 = valor_dc%2;
 }
 
-//valor_dc È a variavel que contem os 10 bits de resoluÁ„o que indicam qual o valor 
-// no momento do meu duty cycle, È retirado os 2 bits LS deste valor e armazenado em CCPR2L
+//valor_dc √© a variavel que contem os 10 bits de resolu√ß√£o que indicam qual o valor 
+// no momento do meu duty cycle, √© retirado os 2 bits LS deste valor e armazenado em CCPR2L
  
